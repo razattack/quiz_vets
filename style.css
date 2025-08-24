@@ -13,3 +13,7 @@
   line-height: 1.4;
   border-radius: 14px;
 }
+@media (min-width: 768px) {
+  .question { font-size: 1.6rem; }
+  .option { font-size: 1.25rem; }
+}
