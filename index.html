@@ -1,80 +1,288 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Feline Veterinary Quiz</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="app">
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <time.h>
 
-    <div class="topbar panel">
-      <div class="brand"><div class="mark">FV</div>Feline Veterinary Quiz</div>
-      <div class="hud">
-        <div class="chip">Band: <strong id="bandName">Beginner</strong></div>
-        <div class="chip">Q: <strong id="qCounter">1</strong>/<span id="qTotal">100</span></div>
-        <div class="chip">Streak: <strong id="streak">0</strong></div>
-        <div class="chip timer"><span id="timerVal">30</span>s</div>
-      </div>
-      <div class="controls">
-        <button id="resumeBtn" class="btn" title="Resume saved game" style="display:none;">Resume</button>
-        <button id="newBtn" class="btn" title="Start a new game">New</button>
-        <label class="toggle" title="Toggle sound">
-          <input id="soundToggle" type="checkbox" />
-          <div class="knob"><div class="dot"></div></div>
-          <span>Sound</span>
-        </label>
-        <label class="toggle" title="High contrast mode">
-          <input id="contrastToggle" type="checkbox" />
-          <div class="knob"><div class="dot"></div></div>
-          <span>Contrast</span>
-        </label>
-      </div>
-    </div>
+int main(){
 
-    <div class="panel" id="quizPanel">
-      <div class="header">
-        <div class="title" id="title">Question</div>
-        <div class="progressbar" aria-label="Progress">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-      </div>
+    // QUIZ MAIN
 
-      <div class="band-banner" id="bandBanner">--- Ramping up difficulty ---</div>
+    char questions[][300] = {
+        "1. What is the minimum recommended age for first rabies vaccination in cats in Canada?\n",
+        "2. Which dental condition is most common in domestic cats?\n",
+        "3. Feline hypertrophic cardiomyopathy most commonly affects which heart chamber?\n",
+        "4. Which parasite is most commonly transmitted transplacentally in cats?\n",
+        "5. The most common cause of feline hyperthyroidism is?\n",
+        "6. Which antibiotic is contraindicated in cats due to esophageal strictures?\n",
+        "7. What vaccine is considered 'core' in Canadian cats?\n",
+        "8. In chronic kidney disease staging (IRIS), staging is primarily based on?\n",
+        "9. Which inhalant anesthetic is most commonly used in Canadian feline practice?\n",
+        "10. Acetaminophen toxicity in cats primarily affects?\n",
+        "11. The primary vector of Bartonella henselae (cat scratch disease) is?\n",
+        "12. Which feline blood type is most common in North America?\n",
+        "13. Which drug is used as the first-line treatment for feline hypertrophic cardiomyopathy?\n",
+        "14. Which feline retrovirus is associated with immunosuppression?\n",
+        "15. What is the typical lifespan of a feline red blood cell?\n",
+        "16. Which anesthetic agent should be avoided in cats with hypertrophic cardiomyopathy?\n",
+        "17. Which enzyme deficiency makes cats highly sensitive to certain drugs/toxins?\n",
+        "18. What is the most common clinical sign of feline asthma?\n",
+        "19. Which imaging modality best diagnoses portosystemic shunts in cats?\n",
+        "20. Which nutritional deficiency can occur in cats fed exclusively dog food?\n",
+        "21. Which vitamin deficiency in cats can cause retinal degeneration?\n",
+        "22. Which fluid choice is best for a cat with hypovolemic shock?\n",
+        "23. What is the recommended first-line drug for hypertensive cats?\n",
+        "24. Which antibiotic must never be given IV to cats due to fatal reaction?\n",
+        "25. In cats, which anesthetic agent provides analgesia but increases sympathetic tone?\n",
+        "26. Which core vaccine is typically combined with FHV-1 and FCV?\n",
+        "27. Best screening test for hyperthyroidism in cats?\n",
+        "28. Most sensitive early biomarker for feline CKD progression?\n",
+        "29. Which flea control is safe for cats?\n",
+        "30. Which parasite causes cutaneous larva migrans in humans?\n",
+        "31. FIP is caused by mutation of which virus?\n",
+        "32. Preferred treatment for feline hyperthyroidism in renal-compromised cats?\n",
+        "33. Which drug is a contraindication with tramadol due to serotonin syndrome risk?\n",
+        "34. Classic radiographic sign of feline asthma?\n",
+        "35. Best first test for suspected pleural effusion?\n",
+        "36. Common cause of urethral obstruction in male cats?\n",
+        "37. Best stabilization for blocked cat before anesthesia?\n",
+        "38. First-line antiemetic for feline nausea?\n",
+        "39. Which analgesic is safest for cats with CKD?\n",
+        "40. Which antibiotic is effective against Mycoplasma haemofelis?\n",
+        "41. Gold standard for diagnosing hyperthyroidism when total T4 equivocal?\n",
+        "42. Which test screens FeLV infection initially?\n",
+        "43. Which endocrine disease causes insulin resistance in cats?\n",
+        "44. Preferred insulin for newly diagnosed feline diabetes?\n",
+        "45. Most common urolith type in cats?\n",
+        "46. Which crystal forms in alkaline urine in cats?\n",
+        "47. Key dietary change to prevent FLUTD recurrences?\n",
+        "48. Which cardiomyopathy is most common in cats?\n",
+        "49. Which test estimates left atrial enlargement non-invasively?\n",
+        "50. Which anticoagulant is used for ATE risk in HCM cats?\n",
+        "51. Best imaging for biliary obstruction in cats?\n",
+        "52. Which enzyme is most liver-specific in cats?\n",
+        "53. Which disease is linked to triaditis in cats?\n",
+        "54. Best test for EPI in cats?\n",
+        "55. Which antibiotic causes retinal toxicity in cats at high doses?\n",
+        "56. Which antiviral is used for FHV-1 keratitis?\n",
+        "57. Preferred analgesia for moderate postoperative pain in cats?\n",
+        "58. Which sedative can cause significant bradycardia in cats?\n",
+        "59. Best reversal agent for dexmedetomidine?\n",
+        "60. Which induction agent preserves cardiovascular stability best?\n",
+        "61. Which emergency drug treats calcium channel blocker overdose?\n",
+        "62. Which electrolyte abnormality is typical in hypoadrenocorticism?\n",
+        "63. Best screening for proteinuria in cats?\n",
+        "64. Which test confirms hypertension-induced retinal detachment?\n",
+        "65. Mainstay therapy for idiopathic cystitis?\n",
+        "66. Which anticonvulsant is safest long-term in cats?\n",
+        "67. Which antibiotic class risks esophageal injury if dry-pilled?\n",
+        "68. Best first test for hemoabdomen?\n",
+        "69. Which drug is contraindicated in feline asthma?\n",
+        "70. Which vaccine can cause injection-site sarcomas rarely?\n",
+        "71. Preferred site for rabies vaccination in cats (Canada)?\n",
+        "72. Best test for early HCM detection in asymptomatic cats?\n",
+        "73. Safe opioid for severe pain in cats?\n",
+        "74. Which NSAID is labeled for cats (single dose)?\n",
+        "75. Nutritional requirement unique to cats?\n",
+        "76. Which antibiotic is effective for toxoplasmosis?\n",
+        "77. Which test confirms giardiasis?\n",
+        "78. Which drug is used to treat hypertrophic obstructive cardiomyopathy?\n",
+        "79. Which imaging best detects ureteral calculi?\n",
+        "80. Which therapy reduces ureteral obstruction in cats?\n",
+        "81. Which endocrine test confirms acromegaly?\n",
+        "82. Common cause of feline cholangitis?\n",
+        "83. Which lab abnormality suggests hepatic lipidosis?\n",
+        "84. Which tube is used for long-term enteral feeding?\n",
+        "85. Which antibiotic penetrates prostate tissue well?\n",
+        "86. Which anesthetic risk increases with anemia?\n",
+        "87. Which ECG change suggests hyperkalemia?\n",
+        "88. Best emergency treatment for hyperkalemia?\n",
+        "89. Which fluid is hypotonic and not for resuscitation?\n",
+        "90. Which drug reverses benzodiazepines?\n",
+        "91. Which antibiotic is contraindicated in young kittens (teeth/bone)?\n",
+        "92. Which test diagnoses FIV infection definitively?\n",
+        "93. Which cardiopulmonary parasite affects cats occasionally?\n",
+        "94. Which drug treats anaphylaxis acutely?\n",
+        "95. Which antibiotic is best for bite wound anaerobes?\n",
+        "96. Best imaging for nasal mass in cats?\n",
+        "97. Which tumor is linked to FeLV historically?\n",
+        "98. Which chemotherapy drug risks hemorrhagic cystitis?\n",
+        "99. Which drug treats hypertensive emergencies in cats IV?\n",
+        "100. Which therapy induces remission in insulin-resistant acromegalic cats?\n"
+    };
 
-      <div class="content" id="quiz">
-        <div id="question" class="question"></div>
-        <div id="options" class="options" role="list"></div>
-      </div>
+    char options[][300] = {
+        "A. 8 weeks\nB. 12 weeks\nC. 16 weeks\nD. 6 months\n",
+        "A. Tooth fractures\nB. Gingivostomatitis\nC. Tooth resorption\nD. Periodontal abscess\n",
+        "A. Left atrium\nB. Right atrium\nC. Left ventricle\nD. Right ventricle\n",
+        "A. Roundworm\nB. Tapeworm\nC. Hookworm\nD. Giardia\n",
+        "A. Carcinoma\nB. Adenomatous hyperplasia\nC. Iodine deficiency\nD. Pituitary tumor\n",
+        "A. Amoxicillin\nB. Ciprofloxacin\nC. Doxycycline\nD. Clindamycin\n",
+        "A. FIV\nB. FeLV\nC. Rabies\nD. Chlamydia\n",
+        "A. SDMA level\nB. Creatinine\nC. USG\nD. Blood pressure\n",
+        "A. Sevoflurane\nB. Isoflurane\nC. Halothane\nD. Nitrous oxide\n",
+        "A. Liver\nB. Kidneys\nC. Spleen\nD. Pancreas\n",
+        "A. Ticks\nB. Mosquitoes\nC. Fleas\nD. Lice\n",
+        "A. Type A\nB. Type B\nC. Type AB\nD. Type C\n",
+        "A. Furosemide\nB. Pimobendan\nC. Atenolol\nD. Enalapril\n",
+        "A. FeLV\nB. FIV\nC. FIP\nD. FCV\n",
+        "A. 30 days\nB. 60 days\nC. 90 days\nD. 120 days\n",
+        "A. Ketamine\nB. Propofol\nC. Alfaxalone\nD. Midazolam\n",
+        "A. CYP3A4\nB. Glucuronyl transferase\nC. Monoamine oxidase\nD. Cholinesterase\n",
+        "A. Sneezing\nB. Coughing\nC. Vomiting\nD. Wheezing\n",
+        "A. X-ray\nB. CT angiography\nC. MRI\nD. Ultrasound\n",
+        "A. Vitamin B12\nB. Calcium\nC. Taurine\nD. Iron\n",
+        "A. Vitamin A\nB. Vitamin D\nC. Taurine\nD. Vitamin E\n",
+        "A. 0.9% NaCl\nB. Lactated Ringers\nC. Plasma\nD. Dextrose 5%\n",
+        "A. Atenolol\nB. Amlodipine\nC. Enalapril\nD. Hydralazine\n",
+        "A. Penicillin\nB. Cefovecin\nC. Doxycycline\nD. Procaine Pen G\n",
+        "A. Propofol\nB. Ketamine\nC. Midazolam\nD. Isoflurane\n",
+        "A. Panleukopenia\nB. Calicivirus\nC. Chlamydia\nD. Bordetella\n",
+        "A. Free T4\nB. Total T4\nC. TSH\nD. T3 uptake\n",
+        "A. SDMA\nB. Creatinine\nC. BUN\nD. USG\n",
+        "A. Permethrin\nB. Fipronil (cat)\nC. Organophosphate\nD. Amitraz\n",
+        "A. Hookworm\nB. Roundworm\nC. Whipworm\nD. Tapeworm\n",
+        "A. FeLV\nB. FCoV\nC. FCV\nD. FHV-1\n",
+        "A. I-131\nB. Methimazole\nC. Thyroidectomy\nD. Low-iodine diet\n",
+        "A. SSRIs\nB. Tramadol\nC. Gabapentin\nD. Maropitant\n",
+        "A. Air bronchograms\nB. Bronchial pattern\nC. Alveolar pattern\nD. Interstitial\n",
+        "A. CT\nB. Thoracocentesis\nC. US\nD. Radiographs\n",
+        "A. Struvite\nB. Mucus plug\nC. Calcium oxalate\nD. Urethral stone\n",
+        "A. Induce anesthesia\nB. Cystocentesis\nC. Fluids + stabilize\nD. Perineal massage\n",
+        "A. Maropitant\nB. Metoclopramide\nC. Ondansetron\nD. Diphenhydramine\n",
+        "A. NSAIDs\nB. Buprenorphine\nC. Tramadol\nD. Acetaminophen\n",
+        "A. Amoxicillin\nB. Doxycycline\nC. Enrofloxacin\nD. Azithromycin\n",
+        "A. TSH\nB. Free T4 by ED\nC. Total T4\nD. TRH stimulation\n",
+        "A. IFA\nB. ELISA\nC. PCR\nD. Western blot\n",
+        "A. Addison's\nB. Cushing's\nC. Hyperthyroidism\nD. Pheochromocytoma\n",
+        "A. NPH\nB. Glargine\nC. Detemir\nD. PZI\n",
+        "A. Struvite\nB. Calcium oxalate\nC. Urate\nD. Cystine\n",
+        "A. Struvite\nB. Oxalate\nC. Urate\nD. Cystine\n",
+        "A. High sodium\nB. High moisture\nC. High protein\nD. High magnesium\n",
+        "A. DCM\nB. RCM\nC. HCM\nD. ARVC\n",
+        "A. Radiographs\nB. NT-proBNP\nC. ECG\nD. LA:Ao echo\n",
+        "A. Heparin\nB. Clopidogrel\nC. Aspirin\nD. Warfarin\n",
+        "A. Radiographs\nB. Ultrasound\nC. CT\nD. MRI\n",
+        "A. ALT\nB. AST\nC. ALP\nD. GGT\n",
+        "A. Pancreatitis\nB. IBD\nC. Hepatitis\nD. All three\n",
+        "A. TLI\nB. cPLI\nC. fPLI\nD. B12 level\n",
+        "A. Enrofloxacin\nB. Doxycycline\nC. Amikacin\nD. Clindamycin\n",
+        "A. Oseltamivir\nB. Famciclovir\nC. Acyclovir\nD. Ganciclovir\n",
+        "A. NSAID alone\nB. Buprenorphine\nC. Acetaminophen\nD. Phenylbutazone\n",
+        "A. Midazolam\nB. Dexmedetomidine\nC. Acepromazine\nD. Ketamine\n",
+        "A. Naloxone\nB. Flumazenil\nC. Atipamezole\nD. Yohimbine\n",
+        "A. Etomidate\nB. Propofol\nC. Ketamine\nD. Thiopental\n",
+        "A. Calcium gluconate\nB. Atropine\nC. Insulin/dextrose\nD. Lipid emulsion\n",
+        "A. Hypernatremia\nB. Hypokalemia\nC. Hyperkalemia\nD. Hypoglycemia\n",
+        "A. Dipstick\nB. UPC ratio\nC. Sediment exam\nD. SSA test\n",
+        "A. Indirect BP\nB. Direct BP\nC. Fundic exam\nD. ECG\n",
+        "A. Antibiotics\nB. Steroids\nC. Environmental mods\nD. Diuretics\n",
+        "A. Phenobarbital\nB. Levetiracetam\nC. Zonisamide\nD. KBr\n",
+        "A. Fluoroquinolones\nB. Tetracyclines\nC. Macrolides\nD. Cephalosporins\n",
+        "A. FAST scan\nB. CT\nC. Radiographs\nD. Peritoneal tap\n",
+        "A. Terbutaline\nB. Furosemide\nC. Prednisone\nD. Albuterol\n",
+        "A. Rabies\nB. FeLV\nC. FIV\nD. Panleukopenia\n",
+        "A. Right forelimb\nB. Right hindlimb\nC. Left forelimb\nD. Left hindlimb\n",
+        "A. Radiographs\nB. NT-proBNP\nC. Genetic test\nD. Echocardiogram\n",
+        "A. Fentanyl\nB. Codeine\nC. Meperidine\nD. Loperamide\n",
+        "A. Carprofen\nB. Meloxicam\nC. Robenacoxib\nD. Aspirin\n",
+        "A. Taurine\nB. Vitamin C\nC. Beta-carotene\nD. Linoleic acid\n",
+        "A. Clindamycin\nB. Metronidazole\nC. Penicillin\nD. Amikacin\n",
+        "A. Wet mount\nB. Fecal ELISA\nC. Zinc sulfate float\nD. PCR panel\n",
+        "A. Atenolol\nB. Diltiazem\nC. Pimobendan\nD. Enalapril\n",
+        "A. Radiographs\nB. Ultrasound\nC. Non-contrast CT\nD. MRI\n",
+        "A. Alpha blockers\nB. Tamsulosin\nC. Nifedipine\nD. Stents/SUB\n",
+        "A. Insulin level\nB. IGF-1\nC. ACTH stim\nD. Dexamethasone\n",
+        "A. E. coli\nB. Ascending bacteria\nC. Lymphocytic\nD. Flukes\n",
+        "A. Low ALT\nB. High ALP\nC. Low bilirubin\nD. High CK\n",
+        "A. Nasoenteric\nB. Esophagostomy\nC. PEG\nD. Jejunostomy\n",
+        "A. Penicillin\nB. Enrofloxacin\nC. Chloramphenicol\nD. Amoxiclav\n",
+        "A. Hypotension\nB. Hypercapnia\nC. Hypoxemia\nD. All three\n",
+        "A. Tall T waves\nB. Short PR\nC. Wide QRS\nD. Osborn waves\n",
+        "A. Calcium gluconate\nB. Sodium bicarb\nC. Insulin/dextrose\nD. All three\n",
+        "A. LRS\nB. 0.9% NaCl\nC. D5W\nD. Plasmalyte\n",
+        "A. Naloxone\nB. Flumazenil\nC. Atipamezole\nD. N-acetylcysteine\n",
+        "A. Chloramphenicol\nB. Tetracyclines\nC. Fluoroquinolones\nD. Aminoglycosides\n",
+        "A. ELISA antibody\nB. Western blot\nC. PCR\nD. Virus isolation\n",
+        "A. Aelurostrongylus\nB. Dirofilaria\nC. Capillaria\nD. Angiostrongylus\n",
+        "A. Diphenhydramine\nB. Epinephrine\nC. Prednisone\nD. Albuterol\n",
+        "A. Clindamycin\nB. Metronidazole\nC. Doxycycline\nD. Trimethoprim sulfa\n",
+        "A. Radiographs\nB. CT\nC. MRI\nD. Ultrasound\n",
+        "A. Osteosarcoma\nB. Lymphoma\nC. SCC\nD. MCT\n",
+        "A. Cyclophosphamide\nB. Doxorubicin\nC. Vincristine\nD. Lomustine\n",
+        "A. Hydralazine\nB. Labetalol\nC. Nitroprusside\nD. Esmolol\n",
+        "A. Hypophysectomy\nB. SRT (radiation)\nC. Pasireotide\nD. Cabergoline\n"
+    };
 
-      <div class="footer">
-        <div class="chip">Tip: use <span class="kbd">A</span>, <span class="kbd">B</span>, <span class="kbd">C</span>, <span class="kbd">D</span> to answer, <span class="kbd">N</span> for next</div>
-        <button id="nextBtn" class="btn primary" disabled>Next →</button>
-      </div>
-    </div>
+    char answerKey[] = {
+        'B','C','C','A','B','C','C','B','B','A',
+        'C','A','C','B','C','A','B','B','B','C',
+        'A','B','B','D','B','A','B','A','B','A',
+        'B','A','B','B','B','C','C','B','B','B',
+        'B','B','D','B','B','B','B','C','C','B',
+        'B','A','D','D','C','B','B','B','C','A',
+        'D','C','B','D','C','B','B','A','C','A',
+        'B','D','A','D','B','D','B','B','A','C',
+        'A','C','B','B','B','B','D','B','D','B',
+        'C','B','A','B','B','B','B','B','B','C',
+        'B','B','A','B','B','C','C','B','C','B'
+    };
 
-    <div id="scoreView" class="panel score" style="display:none;">
-      <h2>All done! 🎉</h2>
-      <p id="scoreLine"></p>
-      <div class="breakdown" id="breakdown"></div>
-      <div style="margin-top:18px;">
-        <button id="restartBtn" class="btn">Restart</button>
-        <button id="shareBtn" class="btn">Share</button>
-        <button id="exportBtn" class="btn">Export CSV</button>
-      </div>
-    </div>
-  </div>
+    int total = sizeof(questions) / sizeof(questions[0]);
 
-  <!-- Sound assets (tiny placeholders; replace with real files if desired) -->
-  <audio id="s-click" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
-  <audio id="s-correct" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
-  <audio id="s-wrong" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
-  <audio id="s-band" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
-  <audio id="s-complete" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
-  <audio id="s-tick" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+    struct Band { int start; int end; } bands[] = {
+        {0,19},   // Q1-20
+        {20,39},  // Q21-40
+        {40,59},  // Q41-60
+        {60,79},  // Q61-80
+        {80,99}   // Q81-100
+    };
+    int bandCount = sizeof(bands)/sizeof(bands);
 
-  <script src="script.js"></script>
-</body>
-</html>
+    srand((unsigned)time(NULL));
+
+    char guess = '\0';
+    int score = 0;
+
+    printf("*** QUIZ GAME (difficulty-banded shuffle) ***\n");
+
+    for(int b = 0; b < bandCount; b++){
+        int start = bands[b].start;
+        int end   = bands[b].end;
+        int n     = end - start + 1;
+
+        int idx[20]; // band size is 20
+        for(int i = 0; i < n; i++) idx[i] = start + i;
+
+        // Fisher–Yates
+        for(int i = n - 1; i > 0; i--){
+            int j = rand() % (i + 1);
+            int tmp = idx[i];
+            idx[i] = idx[j];
+            idx[j] = tmp;
+        }
+
+        for(int k = 0; k < n; k++){
+            int i = idx[k];
+            printf("%s", questions[i]);
+            printf("%s", options[i]);
+            printf("Enter your choice (A / B / C / D): ");
+            if (scanf(" %c", &guess) != 1) return 0;
+            guess = toupper((unsigned char)guess);
+
+            if(guess == answerKey[i]){
+                printf("\nCORRECT!\n");
+                score++;
+            } else {
+                printf("\nWRONG!\n");
+            }
+        }
+
+        if (b < bandCount - 1) {
+            printf("\n--- Ramping up difficulty ---\n\n");
+        }
+    }
+
+    printf("\nYour score is %d out of %d points\n", score, total);
+
+    return 0;
+}
