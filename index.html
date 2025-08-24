@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feline Veterinary Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4e89ff;
+      --success: #4CAF50;
+      --danger: #e74c3c;
+      --bg: #f9fafb;
+      --text: #333;
+      --card-bg: #fff;
+      --radius: 12px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+    .quiz-container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      overflow: hidden;
+      padding: 30px;
+      animation: fadeIn 0.6s ease;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+    .question {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .options {
+      display: grid;
+      gap: 15px;
+    }
+    .option {
+      background: #f2f4f7;
+      padding: 14px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      border: 2px solid transparent;
+    }
+    .option:hover {
+      background: #e8f0ff;
+    }
+    .option.correct {
+      border-color: var(--success);
+      background: #e6f9ec;
+    }
+    .option.wrong {
+      border-color: var(--danger);
+      background: #fdecea;
+    }
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: #ddd;
+      border-radius: 5px;
+      margin: 30px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .next-btn, .restart-btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.3s ease;
+    }
+    .next-btn:hover, .restart-btn:hover {
+      background: #356ae6;
+    }
+    .hidden {
+      display: none;
+    }
+    .score-section {
+      text-align: center;
+    }
+    .score-section h2 {
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>🐾 Feline Veterinary Quiz</h1>
+    
+    <div class="progress">
+      <div class="progress-bar"></div>
+    </div>
+    
+    <div id="quiz">
+      <div id="question" class="question"></div>
+      <div id="options" class="options"></div>
+      <button id="nextBtn" class="next-btn hidden">Next Question →</button>
+    </div>
+    
+    <div id="scoreSection" class="score-section hidden">
+      <h2>Quiz Completed!</h2>
+      <p id="scoreText"></p>
+      <button id="restartBtn" class="restart-btn">Restart Quiz</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      "What is the minimum recommended age for first rabies vaccination in cats in Canada?",
+      "Which dental condition is most common in domestic cats?",
+      "Feline hypertrophic cardiomyopathy most commonly affects which heart chamber?",
+      "Which parasite is most commonly transmitted transplacentally in cats?",
+      "The most common cause of feline hyperthyroidism is?",
+      "Which antibiotic is contraindicated in cats due to esophageal strictures?",
+      "What vaccine is considered 'core' in Canadian cats?",
+      "In chronic kidney disease staging (IRIS), staging is primarily based on?",
+      "Which inhalant anesthetic is most commonly used in Canadian feline practice?",
+      "Acetaminophen toxicity in cats primarily affects?",
+      "The primary vector of Bartonella henselae (cat scratch disease) is?",
+      "Which feline blood type is most common in North America?",
+      "Which drug is used as the first-line treatment for feline hypertrophic cardiomyopathy?",
+      "Which feline retrovirus is associated with immunosuppression?",
+      "What is the typical lifespan of a feline red blood cell?",
+      "Which anesthetic agent should be avoided in cats with hypertrophic cardiomyopathy?",
+      "Which enzyme deficiency makes cats highly sensitive to certain drugs/toxins?",
+      "What is the most common clinical sign of feline asthma?",
+      "Which imaging modality best diagnoses portosystemic shunts in cats?",
+      "Which nutritional deficiency can occur in cats fed exclusively dog food?"
+    ];
+
+    const options = [
+      ["8 weeks","12 weeks","16 weeks","6 months"],
+      ["Tooth fractures","Gingivostomatitis","Tooth resorption","Periodontal abscess"],
+      ["Left atrium","Right atrium","Left ventricle","Right ventricle"],
+      ["Roundworm","Tapeworm","Hookworm","Giardia"],
+      ["Carcinoma","Adenomatous hyperplasia","Iodine deficiency","Pituitary tumor"],
+      ["Amoxicillin","Ciprofloxacin","Doxycycline","Clindamycin"],
+      ["FIV","FeLV","Rabies","Chlamydia"],
+      ["SDMA level","Creatinine","USG","Blood pressure"],
+      ["Sevoflurane","Isoflurane","Halothane","Nitrous oxide"],
+      ["Liver","Kidneys","Spleen","Pancreas"],
+      ["Ticks","Mosquitoes","Fleas","Lice"],
+      ["Type A","Type B","Type AB","Type C"],
+      ["Furosemide","Pimobendan","Atenolol","Enalapril"],
+      ["FeLV","FIV","FIP","FCV"],
+      ["30 days","60 days","90 days","120 days"],
+      ["Ketamine","Propofol","Alfaxalone","Midazolam"],
+      ["CYP3A4","Glucuronyl transferase","Monoamine oxidase","Cholinesterase"],
+      ["Sneezing","Coughing","Vomiting","Wheezing"],
+      ["X-ray","CT angiography","MRI","Ultrasound"],
+      ["Vitamin B12","Calcium","Taurine","Iron"]
+    ];
+
+    const correctAnswers = [
+      1,2,2,0,1,2,2,1,1,0,2,0,2,1,2,0,1,1,1,2
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("nextBtn");
+    const scoreSection = document.getElementById("scoreSection");
+    const scoreText = document.getElementById("scoreText");
+    const progressBar = document.querySelector(".progress-bar");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function loadQuestion() {
+      questionEl.textContent = questions[currentQuestion];
+      optionsEl.innerHTML = "";
+      options[currentQuestion].forEach((opt, i) => {
+        const btn = document.createElement("div");
+        btn.classList.add("option");
+        btn.textContent = opt;
+        btn.addEventListener("click", () => selectAnswer(i, btn));
+        optionsEl.appendChild(btn);
+      });
+      updateProgress();
+    }
+
+    function selectAnswer(selected, btnEl) {
+      const correct = correctAnswers[currentQuestion];
+      Array.from(optionsEl.children).forEach((btn, i) => {
+        if (i === correct) btn.classList.add("correct");
+        else if (i === selected) btn.classList.add("wrong");
+        btn.style.pointerEvents = "none";
+      });
+      if (selected === correct) score++;
+      nextBtn.classList.remove("hidden");
+    }
+
+    function showScore() {
+      document.getElementById("quiz").classList.add("hidden");
+      scoreSection.classList.remove("hidden");
+      scoreText.textContent = `You scored ${score} out of ${questions.length}`;
+    }
+
+    function updateProgress() {
+      const percent = ((currentQuestion) / questions.length) * 100;
+      progressBar.style.width = percent + "%";
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        loadQuestion();
+        nextBtn.classList.add("hidden");
+      } else {
+        updateProgress();
+        showScore();
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      score = 0;
+      currentQuestion = 0;
+      scoreSection.classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+      nextBtn.classList.add("hidden");
+      loadQuestion();
+      updateProgress();
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>
