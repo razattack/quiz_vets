@@ -1,221 +1,217 @@
+You're right—let’s keep it simple, clean, and elegant like your preferred style, but add your required logic: 100 questions, difficulty-banded Fisher–Yates shuffle, and a 30-second per-question timer that auto-marks incorrect and advances flow with a Next button. No letters (A/B/C/D) shown; just tappable options.
+
+Paste this entire code into index.html.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feline Veterinary Quiz</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --primary:#5a7dff;
-      --primary-2:#8aa2ff;
-      --bg:#0e1116;
-      --panel:rgba(255,255,255,0.08);
-      --text:#e8eef5;
-      --muted:#a9b4c0;
-      --success:#36d399;
-      --danger:#ff6b6b;
-      --ring:#c9d6ff;
-      --radius:14px;
-      --shadow:0 20px 50px rgba(0,0,0,0.35);
+    :root {
+      --primary: #4e89ff;
+      --success: #4CAF50;
+      --danger: #e74c3c;
+      --bg: #f9fafb;
+      --text: #222;
+      --card-bg: #fff;
+      --radius: 12px;
     }
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg:#f5f7fb;
-        --panel:rgba(255,255,255,0.8);
-        --text:#1f2937;
-        --muted:#54657a;
-        --shadow:0 12px 30px rgba(26,30,55,0.12);
-      }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     }
-    *{box-sizing:border-box}
-    html,body{
-      height:100%;
-      margin:0;
-      background:
-        radial-gradient(1200px 800px at 10% 10%, rgba(90,125,255,0.15), transparent 60%),
-        radial-gradient(900px 700px at 90% 30%, rgba(54,211,153,0.12), transparent 60%),
-        var(--bg);
-      color:var(--text);
-      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    .quiz-container {
+      max-width: 820px;
+      margin: 40px auto;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      overflow: hidden;
+      padding: 28px;
+      animation: fadeIn 0.5s ease;
     }
-    .app{max-width:980px;margin:0 auto;padding:24px}
-    .topbar{
-      position:sticky;top:0;z-index:10;
-      display:flex;gap:12px;align-items:center;justify-content:space-between;
-      padding:12px 14px;margin-bottom:18px;border-radius:12px;
-      background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
-      backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-      box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.08);
-    }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
-    .brand .mark{
-      width:34px;height:34px;display:grid;place-items:center;border-radius:10px;
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      color:#fff;font-family:'JetBrains Mono',monospace;
-      box-shadow:0 10px 25px rgba(90,125,255,0.35);
-    }
-    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .chip{
-      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.12);font-size:.95rem;color:var(--muted)
-    }
-    .chip strong{color:var(--text)}
-    .chip.timer{color:#fff;background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.18)}
-    .controls{display:flex;gap:8px;align-items:center}
-    .btn{
-      appearance:none;border:1px solid rgba(255,255,255,0.14);
-      background:linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.02));
-      color:var(--text);padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
-      transition:transform .04s ease,background .2s ease,border-color .2s ease;
-    }
-    .btn:hover{border-color:rgba(255,255,255,0.28)}
-    .btn:active{transform:translateY(1px) scale(0.995)}
-    .btn.primary{
-      background:linear-gradient(135deg,var(--primary),var(--primary-2));
-      border:none;box-shadow:0 10px 24px rgba(90,125,255,0.35);color:#fff;
-    }
-    .toggle{display:inline-flex;align-items:center;gap:8px;user-select:none}
-    .toggle input{display:none}
-    .toggle .knob{
-      width:44px;height:26px;border-radius:999px;position:relative;
-      background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);
-      transition:background .2s ease,border-color .2s ease;
-    }
-    .toggle .dot{
-      position:absolute;top:50%;left:3px;transform:translateY(-50%);
-      width:20px;height:20px;border-radius:999px;background:#fff;transition:left .2s ease;
-    }
-    .toggle input:checked + .knob{background:linear-gradient(135deg,var(--primary),var(--primary-2));border:none}
-    .toggle input:checked + .knob .dot{left:21px}
+    @keyframes fadeIn { from {opacity: 0; transform: translateY(16px);} to {opacity: 1; transform: translateY(0);} }
 
-    .panel{
-      border-radius:var(--radius);background:var(--panel);
-      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-      box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.12);overflow:hidden
-    }
-    .header{
-      padding:20px 22px;border-bottom:1px solid rgba(255,255,255,0.08);
-      display:flex;align-items:center;justify-content:space-between;gap:12px
-    }
-    .title{font-size:1.4rem;font-weight:700}
-    .progressbar{
-      position:relative;height:10px;background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.12);border-radius:999px;overflow:hidden;width:50%;
-    }
-    .progress-fill{height:100%;width:0%;background:linear-gradient(135deg,var(--primary),var(--primary-2));transition:width .3s ease}
-
-    .band-banner{
-      display:none;padding:14px;text-align:center;
-      background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));
-      border-top:1px dashed rgba(255,255,255,0.18);
-      border-bottom:1px dashed rgba(255,255,255,0.18);
-      color:var(--muted);font-weight:700;
-    }
-    .band-banner.show{display:block;animation:fadeUp 280ms ease}
-
-    .content{padding:20px 22px}
-    .question{
-      font-size:1.6rem; /* larger for readability */
-      font-weight:700;line-height:1.5;margin-bottom:22px;animation:fadeUp 260ms ease
-    }
-    .options{display:grid;gap:16px;grid-template-columns:1fr}
-    @media (min-width:700px){.options{grid-template-columns:1fr 1fr}}
-    .option{
-      position:relative;padding:20px 22px 20px 60px;border-radius:14px;
-      background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
-      cursor:pointer;transition:border-color .2s ease,background .2s ease,transform .04s ease;outline:none;
-      font-size:1.2rem;line-height:1.45;
-    }
-    .option:hover{border-color:rgba(255,255,255,0.25)}
-    .option:active{transform:translateY(1px)}
-    .option:focus-visible{box-shadow:0 0 0 3px var(--ring)}
-    .opt-key{
-      position:absolute;inset:0 auto 0 14px;width:30px;height:30px;display:grid;place-items:center;border-radius:8px;
-      font-weight:700;font-size:.95rem;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);color:var(--text);
-    }
-    .option.correct{background:rgba(54,211,153,0.12);border-color:rgba(54,211,153,0.6)}
-    .option.wrong{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.6)}
-    .option.disabled{pointer-events:none;opacity:.95}
-
-    .footer{
-      display:flex;justify-content:space-between;align-items:center;
-      padding:18px 22px;border-top:1px solid rgba(255,255,255,0.08);gap:10px
-    }
-    .kbd{
-      font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,0.08);
-      border:1px solid rgba(255,255,255,0.18);border-bottom-width:2px;padding:2px 6px;border-radius:6px;font-size:.85rem;
+    h1 {
+      font-size: 1.9rem;
+      margin: 0 0 12px;
+      text-align: center;
+      color: var(--primary);
     }
 
-    .score{text-align:center;padding:28px}
-    .score h2{margin:0 0 8px}
-    .score .breakdown{
-      margin-top:16px;display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))
+    .top-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
     }
-    .pill{
-      padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.12);
+    .meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .pill {
+      background: #eef2ff;
+      color: #2b3a67;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .timer {
+      background: #fff4e5;
+      color: #8a5a00;
     }
 
-    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 5px;
+      margin: 18px 0 22px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question {
+      font-size: 1.35rem; /* larger and readable */
+      font-weight: 700;
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+    .options {
+      display: grid;
+      gap: 14px;
+    }
+    .option {
+      background: #f2f4f7;
+      padding: 16px 18px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+    .option:hover { background: #e8f0ff; }
+    .option.correct {
+      border-color: var(--success);
+      background: #e6f9ec;
+    }
+    .option.wrong {
+      border-color: var(--danger);
+      background: #fdecea;
+    }
+    .option.disabled { pointer-events: none; opacity: 0.98; }
+
+    .divider {
+      text-align: center;
+      color: #5a6b8a;
+      font-weight: 700;
+      margin: 18px 0 6px;
+      display: none;
+    }
+    .divider.show { display: block; }
+
+    .row-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .tip { color: #6b7280; font-size: 0.9rem; }
+
+    .next-btn, .restart-btn {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+    .next-btn:hover, .restart-btn:hover { background: #356ae6; }
+    .next-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .hidden { display: none; }
+
+    .score-section { text-align: center; }
+    .score-section h2 {
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+    .breakdown {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      margin-top: 14px;
+    }
+    .break-pill {
+      background: #f2f4f7;
+      border-radius: var(--radius);
+      padding: 10px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 480px) {
+      .question { font-size: 1.25rem; }
+      .option { font-size: 1.05rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar panel">
-      <div class="brand"><div class="mark">FV</div>Feline Veterinary Quiz</div>
-      <div class="hud">
-        <div class="chip">Band: <strong id="bandName">Beginner</strong></div>
-        <div class="chip">Q: <strong id="qCounter">1</strong>/<span id="qTotal">100</span></div>
-        <div class="chip">Streak: <strong id="streak">0</strong></div>
-        <div class="chip timer"><span id="timerVal">30</span>s</div>
+  <div class="quiz-container">
+    <h1>🐾 Feline Veterinary Quiz</h1>
+
+    <div class="top-row">
+      <div class="meta">
+        <span class="pill" id="bandPill">Band: Beginner</span>
+        <span class="pill">Q <span id="qNum">1</span>/<span id="qTotal">100</span></span>
+        <span class="pill timer">⏱ <span id="timerVal">30</span>s</span>
       </div>
-      <div class="controls">
-        <button id="newBtn" class="btn" title="Start a new game">New</button>
-        <label class="toggle" title="High contrast mode">
-          <input id="contrastToggle" type="checkbox">
-          <div class="knob"><div class="dot"></div></div>
-          <span>Contrast</span>
-        </label>
+      <button id="newBtn" class="next-btn" type="button">New Game</button>
+    </div>
+
+    <div class="progress"><div class="progress-bar"></div></div>
+
+    <div id="divider" class="divider">— Ramping up difficulty —</div>
+
+    <div id="quiz">
+      <div id="question" class="question"></div>
+      <div id="options" class="options"></div>
+
+      <div class="row-actions">
+        <div class="tip">Use keys A/B/C/D to answer, N for next</div>
+        <button id="nextBtn" class="next-btn" disabled>Next →</button>
       </div>
     </div>
 
-    <div class="panel" id="quizPanel">
-      <div class="header">
-        <div class="title" id="title">Question</div>
-        <div class="progressbar" aria-label="Progress">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-      </div>
-
-      <div class="band-banner" id="bandBanner">--- Ramping up difficulty ---</div>
-
-      <div class="content" id="quiz">
-        <div id="question" class="question"></div>
-        <div id="options" class="options" role="list"></div>
-      </div>
-
-      <div class="footer">
-        <div class="chip">Tip: use <span class="kbd">A</span>, <span class="kbd">B</span>, <span class="kbd">C</span>, <span class="kbd">D</span> to answer, <span class="kbd">N</span> for next</div>
-        <button id="nextBtn" class="btn primary" disabled>Next →</button>
-      </div>
-    </div>
-
-    <div id="scoreView" class="panel score" style="display:none;">
-      <h2>All done! 🎉</h2>
-      <p id="scoreLine"></p>
-      <div class="breakdown" id="breakdown"></div>
-      <div style="margin-top:18px;">
-        <button id="restartBtn" class="btn">Restart</button>
-        <button id="shareBtn" class="btn">Share</button>
-        <button id="exportBtn" class="btn">Export CSV</button>
-      </div>
+    <div id="scoreSection" class="score-section hidden">
+      <h2>Quiz Completed!</h2>
+      <p id="scoreText"></p>
+      <div id="breakdown" class="breakdown"></div>
+      <button id="restartBtn" class="restart-btn">Restart</button>
     </div>
   </div>
 
   <script>
-    // ================== DATA ==================
+    // ========== DATA (from your C code) ==========
     const questions = [
 "1. What is the minimum recommended age for first rabies vaccination in cats in Canada?",
 "2. Which dental condition is most common in domestic cats?",
@@ -434,309 +430,213 @@
 ];
     const answerKey = keyLetters.map(ch => ({A:0,B:1,C:2,D:3}[ch]));
 
-    // Bands: five bands of 20
-    const bandMeta = [
-      {name:"Beginner", start:0, end:19},
-      {name:"Intermediate", start:20, end:39},
-      {name:"Advanced", start:40, end:59},
-      {name:"Expert", start:60, end:79},
-      {name:"Master", start:80, end:99},
+    // 5 bands of 20
+    const bands = [
+      { name: 'Beginner', start: 0, end: 19 },
+      { name: 'Intermediate', start: 20, end: 39 },
+      { name: 'Advanced', start: 40, end: 59 },
+      { name: 'Expert', start: 60, end: 79 },
+      { name: 'Master', start: 80, end: 99 },
     ];
 
-    // ================== STATE & DOM ==================
-    const CONTRAST_KEY='fvq_contrast';
-    const QUIZ_KEY='fvq_state_v1';
-    const QUESTION_TIME=30;
+    // ========== STATE ==========
+    const QUESTION_TIME = 30;
+    let seq = []; // [{q, band}]
+    let cursor = 0;
+    let score = 0;
+    let answered = false;
+    let timeLeft = QUESTION_TIME;
+    let timer = null;
+    let bandScores = bands.map(() => ({ correct: 0, total: 0 }));
 
-    const bandBanner=document.getElementById('bandBanner');
-    const bandNameEl=document.getElementById('bandName');
-    const qCounterEl=document.getElementById('qCounter');
-    const qTotalEl=document.getElementById('qTotal');
-    const streakEl=document.getElementById('streak');
-    const titleEl=document.getElementById('title');
-    const questionEl=document.getElementById('question');
-    const optionsEl=document.getElementById('options');
-    const nextBtn=document.getElementById('nextBtn');
-    const progressFill=document.getElementById('progressFill');
-    const scoreView=document.getElementById('scoreView');
-    const scoreLine=document.getElementById('scoreLine');
-    const breakdown=document.getElementById('breakdown');
-    const restartBtn=document.getElementById('restartBtn');
-    const shareBtn=document.getElementById('shareBtn');
-    const exportBtn=document.getElementById('exportBtn');
-    const quizPanel=document.getElementById('quizPanel');
-    const timerValEl=document.getElementById('timerVal');
-    const newBtn=document.getElementById('newBtn');
-    const contrastToggle=document.getElementById('contrastToggle');
+    // ========== DOM ==========
+    const qEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('nextBtn');
+    const scoreSection = document.getElementById('scoreSection');
+    const quizSection = document.getElementById('quiz');
+    const scoreText = document.getElementById('scoreText');
+    const progressBar = document.querySelector('.progress-bar');
+    const restartBtn = document.getElementById('restartBtn');
+    const qNumEl = document.getElementById('qNum');
+    const qTotalEl = document.getElementById('qTotal');
+    const timerValEl = document.getElementById('timerVal');
+    const bandPill = document.getElementById('bandPill');
+    const divider = document.getElementById('divider');
+    const newBtn = document.getElementById('newBtn');
+    const breakdown = document.getElementById('breakdown');
 
-    let seq=[]; // [{q,band}]
-    let cursor=0, score=0, streak=0;
-    let answered=false;
-    let bandScores=bandMeta.map(()=>({correct:0,total:0}));
-    let timer=null, timeLeft=QUESTION_TIME;
-    let history=[];
+    qTotalEl.textContent = String(questions.length);
 
-    // ================== HELPERS ==================
-    function shuffle(arr){
-      for(let i=arr.length-1;i>0;i--){
-        const j=Math.floor(Math.random()*(i+1));
-        [arr[i],arr[j]]=[arr[j],arr[i]];
+    // ========== HELPERS ==========
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
     }
-    function buildSequence(){
-      seq=[];
-      bandMeta.forEach((b,idx)=>{
-        const temp=[];
-        for(let i=b.start;i<=b.end;i++) temp.push(i);
+
+    function buildSequence() {
+      seq = [];
+      bands.forEach((b, idx) => {
+        const temp = [];
+        for (let i = b.start; i <= b.end; i++) temp.push(i);
         shuffle(temp);
-        seq.push(...temp.map(q=>({q,band:idx})));
+        seq.push(...temp.map(q => ({ q, band: idx })));
       });
-      cursor=0;score=0;streak=0;answered=false;
-      bandScores=bandMeta.map(()=>({correct:0,total:0}));
-      history=[];
+      cursor = 0;
+      score = 0;
+      answered = false;
+      timeLeft = QUESTION_TIME;
+      bandScores = bands.map(() => ({ correct: 0, total: 0 }));
+      divider.classList.remove('show');
     }
-    function stopTimer(){ if(timer){clearInterval(timer);timer=null;} }
-    function startTimer(){
+
+    function stopTimer() {
+      if (timer) { clearInterval(timer); timer = null; }
+    }
+    function startTimer() {
       stopTimer();
-      timeLeft=QUESTION_TIME;
-      timerValEl.textContent=timeLeft;
-      timer=setInterval(()=>{
+      timeLeft = QUESTION_TIME;
+      timerValEl.textContent = timeLeft;
+      timer = setInterval(() => {
         timeLeft--;
-        timerValEl.textContent=timeLeft;
-        if(timeLeft<=0){
+        timerValEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
           stopTimer();
-          onTimeout();
+          timeoutReveal();
         }
-        persist();
-      },1000);
+      }, 1000);
     }
-    function onTimeout(){
-      if(answered) return;
-      const {q}=seq[cursor];
-      const correct=answerKey[q];
-      Array.from(optionsEl.children).forEach((el,idx)=>{
-        el.classList.add('disabled');
-        if(idx===correct) el.classList.add('correct');
+
+    function timeoutReveal() {
+      if (answered) return;
+      const { q } = seq[cursor];
+      const correct = answerKey[q];
+      Array.from(optionsEl.children).forEach((btn, i) => {
+        btn.classList.add('disabled');
+        if (i === correct) btn.classList.add('correct');
       });
-      answered=true; nextBtn.disabled=false; streak=0;
-      bandScores[seq[cursor].band].total+=1;
-      history.push({index:q+1, band:bandMeta[seq[cursor].band].name, correct:false, answered:false, time:QUESTION_TIME});
-    }
-    function showBandBanner(){
-      bandBanner.textContent='--- Ramping up difficulty ---';
-      bandBanner.classList.add('show');
-      setTimeout(()=>bandBanner.classList.remove('show'),1200);
+      answered = true;
+      nextBtn.disabled = false;
+      bandScores[seq[cursor].band].total += 1;
     }
 
-    // ================== RENDER ==================
-    function renderQuestion(){
-      if(cursor>=seq.length) return showScore();
-      const {q,band}=seq[cursor];
-      const bandInfo=bandMeta[band];
+    function updateProgress() {
+      const percent = (cursor / seq.length) * 100;
+      progressBar.style.width = percent + '%';
+    }
 
-      bandNameEl.textContent=bandInfo.name;
-      qCounterEl.textContent=String(cursor+1);
-      qTotalEl.textContent=String(seq.length);
-      streakEl.textContent=String(streak);
+    function loadQuestion() {
+      if (cursor >= seq.length) {
+        return showScore();
+      }
 
-      titleEl.textContent=`Question ${cursor+1}`;
-      // Remove numeric prefix in UI for cleaner reading
-      questionEl.textContent=questions[q].replace(/^\d+\.\s*/,'');
-      optionsEl.innerHTML='';
-      const letters=['A','B','C','D'];
-      options[q].forEach((opt,i)=>{
-        const btn=document.createElement('button');
-        btn.className='option';
-        btn.setAttribute('role','listitem');
-        btn.innerHTML=`<span class="opt-key">${letters[i]}</span>${opt}`;
-        btn.addEventListener('click',()=>choose(i));
-        btn.addEventListener('keydown',(ev)=>{
-          if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();choose(i);}
-        });
+      const { q, band } = seq[cursor];
+      const bandName = bands[band].name;
+      bandPill.textContent = `Band: ${bandName}`;
+
+      if (cursor > 0 && seq[cursor - 1].band !== band) {
+        divider.classList.add('show');
+      } else {
+        divider.classList.remove('show');
+      }
+
+      qEl.textContent = questions[q].replace(/^\d+\.\s*/, '');
+      optionsEl.innerHTML = '';
+
+      options[q].forEach((opt, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'option';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => selectAnswer(i));
         optionsEl.appendChild(btn);
       });
 
-      const percent=(cursor/seq.length)*100;
-      progressFill.style.width=`${percent}%`;
-      nextBtn.disabled=true;
-      answered=false;
+      answered = false;
+      nextBtn.disabled = true;
 
-      if(cursor>0 && seq[cursor-1].band!==band) showBandBanner();
-
+      qNumEl.textContent = String(cursor + 1);
+      updateProgress();
       startTimer();
-      persist();
     }
 
-    function choose(i){
-      if(answered) return;
+    function selectAnswer(selected) {
+      if (answered) return;
       stopTimer();
-      const {q,band}=seq[cursor];
-      const correct=answerKey[q];
+      const { q, band } = seq[cursor];
+      const correct = answerKey[q];
 
-      Array.from(optionsEl.children).forEach((el,idx)=>{
-        el.classList.add('disabled');
-        if(idx===correct) el.classList.add('correct');
-        else if(idx===i) el.classList.add('wrong');
+      Array.from(optionsEl.children).forEach((btn, i) => {
+        btn.classList.add('disabled');
+        if (i === correct) btn.classList.add('correct');
+        else if (i === selected) btn.classList.add('wrong');
       });
 
-      answered=true; nextBtn.disabled=false;
-      bandScores[band].total+=1;
-      const used=QUESTION_TIME-timeLeft;
-
-      if(i===correct){
-        score++; streak++; bandScores[band].correct+=1;
-        history.push({index:q+1, band:bandMeta[band].name, correct:true, answered:true, time:used});
-      }else{
-        streak=0;
-        history.push({index:q+1, band:bandMeta[band].name, correct:false, answered:true, time:used});
+      bandScores[band].total += 1;
+      if (selected === correct) {
+        score++;
+        bandScores[band].correct += 1;
       }
-      persist();
+
+      answered = true;
+      nextBtn.disabled = false;
     }
 
-    function next(){
-      if(!answered) return;
+    function next() {
+      if (!answered) return;
       cursor++;
-      if(cursor<seq.length) renderQuestion();
-      else showScore();
+      if (cursor < seq.length) {
+        loadQuestion();
+      } else {
+        updateProgress();
+        showScore();
+      }
     }
 
-    function showScore(){
-      document.getElementById('quizPanel').style.display='none';
-      scoreView.style.display='block';
-      scoreLine.textContent=`You scored ${score} out of ${seq.length} (${Math.round(score/seq.length*100)}%).`;
-      breakdown.innerHTML='';
-      bandScores.forEach((b,i)=>{
-        const meta=bandMeta[i];
-        const div=document.createElement('div');
-        div.className='pill';
-        const pct=b.total?Math.round(b.correct/b.total*100):0;
-        div.innerHTML=`<strong>${meta.name}</strong><br>${b.correct}/${b.total} (${pct}%)`;
+    function showScore() {
+      quizSection.classList.add('hidden');
+      scoreSection.classList.remove('hidden');
+      scoreText.textContent = `You scored ${score} out of ${questions.length}`;
+
+      breakdown.innerHTML = '';
+      bands.forEach((b, i) => {
+        const s = bandScores[i];
+        const pct = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+        const div = document.createElement('div');
+        div.className = 'break-pill';
+        div.innerHTML = `<strong>${b.name}</strong><br>${s.correct}/${s.total} (${pct}%)`;
         breakdown.appendChild(div);
       });
-      localStorage.removeItem(QUIZ_KEY);
     }
 
-    // ================== PERSIST / RESUME & CONTROLS ==================
-    function persist(){
-      const st={seq,cursor,score,streak,answered,bandScores,timeLeft,history};
-      localStorage.setItem(QUIZ_KEY,JSON.stringify(st));
-    }
-    function resumeIfAny(){
-      const raw=localStorage.getItem(QUIZ_KEY);
-      if(!raw) return false;
-      try{
-        const st=JSON.parse(raw);
-        seq=st.seq;cursor=st.cursor;score=st.score;streak=st.streak;
-        answered=st.answered;bandScores=st.bandScores;timeLeft=st.timeLeft??QUESTION_TIME;
-        history=st.history??[];
-        // Re-render current
-        const {q}=seq[cursor];
-        bandNameEl.textContent=bandMeta[seq[cursor].band].name;
-        qCounterEl.textContent=String(cursor+1);
-        qTotalEl.textContent=String(seq.length);
-        streakEl.textContent=String(streak);
-        titleEl.textContent=`Question ${cursor+1}`;
-        questionEl.textContent=questions[q].replace(/^\d+\.\s*/,'');
-        optionsEl.innerHTML='';
-        const letters=['A','B','C','D'];
-        options[q].forEach((opt,i)=>{
-          const btn=document.createElement('button');
-          btn.className='option';
-          btn.innerHTML=`<span class="opt-key">${letters[i]}</span>${opt}`;
-          btn.addEventListener('click',()=>choose(i));
-          optionsEl.appendChild(btn);
-        });
-        const percent=(cursor/seq.length)*100;
-        progressFill.style.width=`${percent}%`;
-
-        if(answered){
-          const correct=answerKey[q];
-          Array.from(optionsEl.children).forEach((el,idx)=>{
-            el.classList.add('disabled');
-            if(idx===correct) el.classList.add('correct');
-          });
-          nextBtn.disabled=false;
-          stopTimer(); timerValEl.textContent=0;
-        }else{
-          if(typeof timeLeft!=='number'||timeLeft<=0||timeLeft>QUESTION_TIME) timeLeft=QUESTION_TIME;
-          timerValEl.textContent=timeLeft;
-          stopTimer();
-          timer=setInterval(()=>{
-            timeLeft--;
-            timerValEl.textContent=timeLeft;
-            if(timeLeft<=0){
-              stopTimer();
-              onTimeout();
-            }
-            persist();
-          },1000);
-        }
-        return true;
-      }catch{ return false; }
-    }
-
-    function applyContrast(on){
-      document.body.style.filter= on ? 'contrast(1.12) saturate(1.08)' : '';
-    }
-    contrastToggle.addEventListener('change',()=>{
-      localStorage.setItem(CONTRAST_KEY, contrastToggle.checked ? '1':'0');
-      applyContrast(contrastToggle.checked);
-    });
-    (function loadPrefs(){
-      const cOn=localStorage.getItem(CONTRAST_KEY);
-      if(cOn!==null){ contrastToggle.checked = cOn==='1'; applyContrast(contrastToggle.checked); }
-    })();
-
-    newBtn.addEventListener('click',()=>{
-      localStorage.removeItem(QUIZ_KEY);
+    function restart() {
+      scoreSection.classList.add('hidden');
+      quizSection.classList.remove('hidden');
       buildSequence();
-      renderQuestion();
-    });
-    nextBtn.addEventListener('click', next);
-    restartBtn.addEventListener('click',()=>{
-      document.getElementById('quizPanel').style.display='';
-      scoreView.style.display='none';
-      buildSequence();
-      renderQuestion();
-    });
-    shareBtn.addEventListener('click', async ()=>{
-      const text=`I scored ${score}/${seq.length} on the Feline Veterinary Quiz!`;
-      if(navigator.share){
-        try{ await navigator.share({text, title:'Feline Veterinary Quiz'}); }catch{}
-      }else{
-        await navigator.clipboard.writeText(text);
-        alert('Score copied to clipboard!');
-      }
-    });
-    exportBtn.addEventListener('click', ()=>{
-      const headers=['QuestionNumber','Band','Correct','Answered','TimeSeconds'];
-      const rows=history.map(h=>[h.index,h.band,h.correct?1:0,h.answered?1:0,h.time]);
-      const csv=[headers.join(','), ...rows.map(r=>r.join(','))].join('\n');
-      const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download='quiz_results.csv';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    });
+      loadQuestion();
+    }
 
     // Keyboard shortcuts
-    window.addEventListener('keydown',(ev)=>{
-      const key=ev.key.toLowerCase();
-      const map={a:0,b:1,c:2,d:3};
-      if(key in map){
-        const el=optionsEl.children[map[key]];
-        if(el) el.click();
-      }else if(key==='n'){
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      const map = { a:0, b:1, c:2, d:3 };
+      if (k in map) {
+        const btn = optionsEl.children[map[k]];
+        if (btn) btn.click();
+      } else if (k === 'n') {
         nextBtn.click();
       }
     });
 
+    nextBtn.addEventListener('click', next);
+    restartBtn.addEventListener('click', restart);
+    newBtn.addEventListener('click', restart);
+
     // Init
-    if(!resumeIfAny()){
-      buildSequence();
-      renderQuestion();
-    }
+    buildSequence();
+    loadQuestion();
   </script>
 </body>
 </html>
+```
