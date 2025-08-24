@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feline Veterinary Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <div class="topbar panel">
+      <div class="brand"><div class="mark">FV</div>Feline Veterinary Quiz</div>
+      <div class="hud">
+        <div class="chip">Band: <strong id="bandName">Beginner</strong></div>
+        <div class="chip">Q: <strong id="qCounter">1</strong>/<span id="qTotal">100</span></div>
+        <div class="chip">Streak: <strong id="streak">0</strong></div>
+        <div class="chip timer"><span id="timerVal">30</span>s</div>
+      </div>
+      <div class="controls">
+        <button id="resumeBtn" class="btn" title="Resume saved game" style="display:none;">Resume</button>
+        <button id="newBtn" class="btn" title="Start a new game">New</button>
+        <label class="toggle" title="Toggle sound">
+          <input id="soundToggle" type="checkbox" />
+          <div class="knob"><div class="dot"></div></div>
+          <span>Sound</span>
+        </label>
+        <label class="toggle" title="High contrast mode">
+          <input id="contrastToggle" type="checkbox" />
+          <div class="knob"><div class="dot"></div></div>
+          <span>Contrast</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="panel" id="quizPanel">
+      <div class="header">
+        <div class="title" id="title">Question</div>
+        <div class="progressbar" aria-label="Progress">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="band-banner" id="bandBanner">--- Ramping up difficulty ---</div>
+
+      <div class="content" id="quiz">
+        <div id="question" class="question"></div>
+        <div id="options" class="options" role="list"></div>
+      </div>
+
+      <div class="footer">
+        <div class="chip">Tip: use <span class="kbd">A</span>, <span class="kbd">B</span>, <span class="kbd">C</span>, <span class="kbd">D</span> to answer, <span class="kbd">N</span> for next</div>
+        <button id="nextBtn" class="btn primary" disabled>Next →</button>
+      </div>
+    </div>
+
+    <div id="scoreView" class="panel score" style="display:none;">
+      <h2>All done! 🎉</h2>
+      <p id="scoreLine"></p>
+      <div class="breakdown" id="breakdown"></div>
+      <div style="margin-top:18px;">
+        <button id="restartBtn" class="btn">Restart</button>
+        <button id="shareBtn" class="btn">Share</button>
+        <button id="exportBtn" class="btn">Export CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound assets (tiny placeholders; replace with real files if desired) -->
+  <audio id="s-click" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+  <audio id="s-correct" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+  <audio id="s-wrong" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+  <audio id="s-band" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+  <audio id="s-complete" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+  <audio id="s-tick" preload="auto" src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
